@@ -1,73 +1,39 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import "react-drawer/lib/react-drawer.css";
+import PropTypes from 'prop-types';
+import React, { useState } from "react";
 
 import { connect } from "react-redux";
-import { Row, Col } from "reactstrap";
-
 import { Link } from "react-router-dom";
 
-// Reactstrap
-import { Dropdown, DropdownToggle, DropdownMenu } from "reactstrap";
-
-// Import menuDropdown
-import LanguageDropdown from "../CommonForBoth/TopbarDropdown/LanguageDropdown";
-import NotificationDropdown from "../CommonForBoth/TopbarDropdown/NotificationDropdown";
 import ProfileMenu from "../CommonForBoth/TopbarDropdown/ProfileMenu";
-
-import megamenuImg from "../../assets/images/megamenu-img.png";
-
-// import images
-import github from "../../assets/images/brands/github.png";
-import bitbucket from "../../assets/images/brands/bitbucket.png";
-import dribbble from "../../assets/images/brands/dribbble.png";
-import dropbox from "../../assets/images/brands/dropbox.png";
-import mail_chimp from "../../assets/images/brands/mail_chimp.png";
-import slack from "../../assets/images/brands/slack.png";
 
 import logo from "../../assets/images/logo.svg";
 import logoLightSvg from "../../assets/images/logo-light.svg";
 
+import logo_lg from "../../assets/images/logo-lg.png";
+import logo_sm from "../../assets/images/logo-sm.png";
+
+
+
 //i18n
 import { withTranslation } from "react-i18next";
 
-
 // Redux Store
-import { toggleRightSidebar } from "../../store/actions";
+import {
+  showRightSidebarAction,
+  toggleLeftmenu,
+  changeSidebarType,
+} from "../../store/actions";
 
-class Header extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isSearch: false,
-      open: false,
-      position: "right",
-      fullscreen: false,
-      sessionData : JSON.parse(localStorage.getItem('authUser'))
-    };
-    this.toggleMenu = this.toggleMenu.bind(this);
-    this.toggleFullscreen = this.toggleFullscreen.bind(this);
+const Header = props => {
+  const [search, setsearch] = useState(false);
+  const [megaMenu, setmegaMenu] = useState(false);
+  const [socialDrp, setsocialDrp] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
-  }
-  /**
-   * Toggle sidebar
-   */
-  toggleMenu() {
-    this.props.toggleMenuCallback();
-  }
-
-  /**
-   * Toggles the sidebar
-   */
-  toggleRightbar() {
-    this.props.toggleRightSidebar();
-  }
-
-  toggleFullscreen() {
+  function toggleFullscreen() {
     if (
       !document.fullscreenElement &&
-      /* alternative standard method */
-      !document.mozFullScreenElement &&
+      /* alternative standard method */ !document.mozFullScreenElement &&
       !document.webkitFullscreenElement
     ) {
       // current working methods
@@ -80,8 +46,7 @@ class Header extends Component {
           Element.ALLOW_KEYBOARD_INPUT
         );
       }
-      this.setState({ fullscreen: true })
-
+      setFullscreen(true);
     } else {
       if (document.cancelFullScreen) {
         document.cancelFullScreen();
@@ -90,144 +55,119 @@ class Header extends Component {
       } else if (document.webkitCancelFullScreen) {
         document.webkitCancelFullScreen();
       }
-      this.setState({ fullscreen: false })
+      setFullscreen(false);
     }
-
   }
 
-  render() {
-    return (
-      <React.Fragment>
-        <header id="page-topbar">
-          <div className="navbar-header">
-            <div className="d-flex">
-              <div className="navbar-brand-box d-lg-none d-md-block">
-                <Link to="/" className="logo logo-dark">
-                  <span className="logo-sm">
-                    <img src={logo} alt="" height="22" />
-                  </span>
-                </Link>
+  function tToggle() {
+    var body = document.body;
+    if (window.screen.width <= 998) {
+      body.classList.toggle("sidebar-enable");
+    } else {
+      body.classList.toggle("vertical-collpsed");
+      body.classList.toggle("sidebar-enable");
+    }
+  }
 
-                <Link to="/" className="logo logo-light">
-                  <span className="logo-sm">
-                    <img src={logo} alt="" height="22" />
-                  </span>
-                </Link>
-              </div>
+  return (
+    <React.Fragment>
+      <header id="page-topbar">
+        <div className="navbar-header">
+          <div className="d-flex">
 
+            <div className="navbar-brand-box d-lg-none d-md-block">
+              <Link to="/" className="logo logo-dark">
+                <span className="logo-sm">
+                  <img src={logo_sm} alt="" height="22" />
+                </span>
+              </Link>
+
+              <Link to="/" className="logo logo-light">
+                <span className="logo-sm">
+                  <img src={logo_sm} alt="" height="22" />
+                </span>
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                tToggle();
+              }}
+              className="btn btn-sm px-3 font-size-16 header-item "
+              id="vertical-menu-btn"
+            >
+              <i className="fa fa-fw fa-bars" />
+            </button>
+
+          </div>
+          <div className="d-flex">
+            {/* <LanguageDropdown /> */}
+
+
+            <div className="dropdown d-none d-lg-inline-block ms-1">
               <button
                 type="button"
-                onClick={this.toggleMenu}
-                className="btn btn-sm px-3 font-size-16 header-item"
-                id="vertical-menu-btn"
+                onClick={() => {
+                  toggleFullscreen();
+                }}
+                className="btn header-item noti-icon "
+                data-toggle="fullscreen"
               >
-                <i className="fa fa-fw fa-bars"></i>
+                
+                {
+                  fullscreen ? 
+                  <i className="bx bx-exit-fullscreen" /> : 
+                  <i className="bx bx-fullscreen" />
+                }
+
               </button>
-
-              <form className="app-search d-none d-lg-block">
-                <div className="position-relative">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder={this.props.t("Search") + "..."}
-                  />
-                  <span className="bx bx-search-alt"></span>
-                </div>
-              </form>
             </div>
-            <div className="d-flex">
-              <div className="dropdown d-inline-block d-lg-none ms-2">
-                <button
-                  onClick={() => {
-                    this.setState({ isSearch: !this.state.isSearch });
-                  }}
-                  type="button"
-                  className="btn header-item noti-icon"
-                  id="page-header-search-dropdown"
-                >
-                  <i className="mdi mdi-magnify"></i>
-                </button>
-                <div
-                  className={
-                    this.state.isSearch
-                      ? "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0 show"
-                      : "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
-                  }
-                  aria-labelledby="page-header-search-dropdown"
-                >
-                  <form className="p-3">
-                    <div className="form-group m-0">
-                      <div className="input-group">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search ..."
-                          aria-label="Recipient's username"
-                        />
-                        <div className="input-group-append">
-                          <button className="btn btn-primary" type="submit">
-                            <i className="mdi mdi-magnify"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
 
-              {/* <LanguageDropdown /> */}
+            <ProfileMenu />
 
-              <div className="dropdown d-none d-lg-inline-block ms-1">
+            {/* <div
+                onClick={() => {
+                  props.showRightSidebarAction(!props.showRightSidebar);
+                }}
+                className="dropdown d-inline-block"
+              >
                 <button
                   type="button"
-                  onClick={this.toggleFullscreen}
-                  className="btn header-item noti-icon"
-                  data-toggle="fullscreen"
+                  className="btn header-item noti-icon right-bar-toggle "
                 >
-                  {
-                    this.state.fullscreen == false ? 
-                    <i className="bx bx-fullscreen"></i>
-                    : 
-                    <i className="bx bx-exit-fullscreen"></i>
-                  }
-                  
+                  <i className="bx bx-cog bx-spin" />
                 </button>
-              </div>
-
-              {/* <NotificationDropdown /> */}
-              <ProfileMenu />
-
-              <div className="dropdown d-inline-block">
-                <button
-                  onClick={() => {
-                    this.toggleRightbar();
-                  }}
-                  type="button"
-                  className="btn header-item noti-icon right-bar-toggle"
-                >
-                  <i className="bx bx-cog bx-spin"></i>
-                </button>
-              </div>
-            </div>
+              </div> */}
           </div>
-        </header>
-      </React.Fragment>
-    );
-  }
-}
+        </div>
+      </header>
+    </React.Fragment>
+  );
+};
 
 Header.propTypes = {
-  t: PropTypes.any,
-  toggleMenuCallback: PropTypes.any,
+  changeSidebarType: PropTypes.func,
+  leftMenu: PropTypes.any,
+  leftSideBarType: PropTypes.any,
   showRightSidebar: PropTypes.any,
-  toggleRightSidebar: PropTypes.func,
+  showRightSidebarAction: PropTypes.func,
+  t: PropTypes.any,
+  toggleLeftmenu: PropTypes.func
 };
 
 const mapStatetoProps = state => {
-  const { layoutType, showRightSidebar } = state.Layout;
-  return { layoutType, showRightSidebar };
+  const {
+    layoutType,
+    showRightSidebar,
+    leftMenu,
+    leftSideBarType,
+  } = state.Layout;
+  return { layoutType, showRightSidebar, leftMenu, leftSideBarType };
 };
 
-export default connect(mapStatetoProps, { toggleRightSidebar })(
-  withTranslation()(Header)
-);
+export default connect(mapStatetoProps, {
+  showRightSidebarAction,
+  toggleLeftmenu,
+  changeSidebarType,
+})(withTranslation()(Header));

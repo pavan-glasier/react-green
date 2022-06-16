@@ -1,61 +1,61 @@
-import React, { Component } from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
-import { Alert, Card, CardBody, Col, Container, Row, Label } from "reactstrap";
+import { Row, Col, CardBody, Card, Alert, Container, Form, Input, FormFeedback, Label } from "reactstrap";
 
-// Redux
-import { connect } from "react-redux";
-import { Link, Redirect, withRouter } from "react-router-dom";
+//redux
+import { useSelector, useDispatch } from "react-redux";
+
+import { withRouter, Link } from "react-router-dom";
+
+// Formik validation
+import * as Yup from "yup";
+import { useFormik } from "formik";
 
 //Social Media Imports
 import { GoogleLogin } from "react-google-login";
+// import TwitterLogin from "react-twitter-auth"
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+
+// actions
+import { loginUser, socialLogin } from "../../store/actions";
+
+// import images
+import profile from "assets/images/profile-img.png";
+import logo from "assets/images/logo.svg";
 
 //Import config
 import { facebook, google } from "../../config";
 
-import { Formik, Field, Form, ErrorMessage } from "formik";
-import * as Yup from "yup";
+const Login = props => {
 
-// actions
-import { apiError, loginUser, socialLogin } from "../../store/actions";
+   //meta title
+  document.title="Login | Skote - React Admin & Dashboard Template";
 
-// import images
-import profile from "../../assets/images/profile-img.png";
-import logo from "../../assets/images/logo.svg";
-import lightlogo from "../../assets/images/logo-light.svg";
-import {ToastContainer, toast, Slide} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+  const dispatch = useDispatch();
 
-import Bowser from "bowser";
+  const validation = useFormik({
+    // enableReinitialize : use this flag when initial values needs to be changed
+    enableReinitialize: true,
 
-class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      api_Path: process.env.REACT_APP_API_PATH,
-      userAgentData: Bowser.parse(window.navigator.userAgent),
-      isLoading: false
-    };
-    this.handleValidSubmit = this.handleValidSubmit.bind(this)
-    // this.saveSession = this.saveSession.bind(this);
-  }
-
-  // saveSession(obj) {
-  //   localStorage.setItem('authUser', JSON.stringify(obj));
-  //   localStorage.setItem('isLogin', true);
-  //   return true;
-  // }
-
-  componentDidMount() {
-    // this.props.apiError("");
-    if (localStorage.getItem('authUser')) {
-      this.props.history.push("/");
+    initialValues: {
+      email: "admin@themesbrand.com" || '',
+      password: "123456" || '',
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().required("Please Enter Your Email"),
+      password: Yup.string().required("Please Enter Your Password"),
+    }),
+    onSubmit: (values) => {
+      dispatch(loginUser(values, props.history));
     }
-  }
+  });
 
-  signIn = (res, type) => {
-    const { socialLogin } = this.props;
+  const { error } = useSelector(state => ({
+    error: state.Login.error,
+  }));
+
+  const signIn = (res, type) => {
     if (type === "google" && res) {
       const postData = {
         name: res.profileObj.name,
@@ -63,7 +63,7 @@ class Login extends Component {
         token: res.tokenObj.access_token,
         idToken: res.tokenId,
       };
-      socialLogin(postData, this.props.history, type);
+      dispatch(socialLogin(postData, props.history, type));
     } else if (type === "facebook" && res) {
       const postData = {
         name: res.name,
@@ -71,342 +71,227 @@ class Login extends Component {
         token: res.accessToken,
         idToken: res.tokenId,
       };
-      socialLogin(postData, this.props.history, type);
+      dispatch(socialLogin(postData, props.history, type));
     }
   };
 
   //handleGoogleLoginResponse
-  googleResponse = response => {
-    this.signIn(response, "google");
+  const googleResponse = response => {
+    signIn(response, "google");
   };
 
   //handleTwitterLoginResponse
-  twitterResponse = () => { };
+  // const twitterResponse = e => {}
 
   //handleFacebookLoginResponse
-  facebookResponse = response => {
-    this.signIn(response, "facebook");
+  const facebookResponse = response => {
+    signIn(response, "facebook");
   };
 
-
-  // handleValidSubmit
-  handleValidSubmit(values) {
-    this.setState({isLoading:true})
-    const loginData = {
-      email: values.email,
-      password: values.password,
-    }
-    const tokenBlob = new Blob([JSON.stringify(loginData, null, 2)], { type: 'application/json' });
-    const options = {
-      method: 'POST',
-      body: tokenBlob,
-      mode: 'cors',
-      cache: 'default'
-    };
-    fetch(this.state.api_Path + 'user/signin', options).then(r => {
-      r.json().then(user => {
-        if (user.status != 'false') {
-          localStorage.setItem("authUser", JSON.stringify(user));
-          localStorage.setItem("isLogin", true);
-          this.setState({ isLoading: false })
-          this.fatchUserLocation(user.data.id);
-          this.props.history.push("/");
-        } else {
-          localStorage.setItem("authUser", '');
-          localStorage.setItem("isLogin", false);
-          toast(user.message, { 
-            position: toast.POSITION.TOP_RIGHT,
-            type: toast.TYPE.ERROR,
-            autoClose: 4000,
-          })
-          setTimeout(() => {
-            this.setState({ isLoading: false })
-          }, 500);
-          this.props.history.push("/login");
-        }
-      });
-    })
-  }
-  // fatch user location
-  fatchUserLocation (userId){
-    var otherData = {
-      'user_id':userId,
-      'platform':this.state.userAgentData.os.name,
-      'browser':this.state.userAgentData.browser.name,
-      'device':this.state.userAgentData.platform.type,
-    }
-    fetch('https://ipapi.co/json/')
-      .then(function(response) {
-        response.json().then(jsonData => {
-          const tokenBlob = new Blob([JSON.stringify({response: jsonData,otherData}, null, 2)], {type : 'application/json'});
-          const options = {
-            method: 'POST',
-            body: tokenBlob,
-            mode: 'cors',
-            cache: 'default'
-          };
-          // var api_path = process.env.REACT_APP_API_PATH
-          fetch(process.env.REACT_APP_API_PATH+'user/userAgent', options).then(r => {
-            r.json(200);
-          })
-        });
-      })
-      .catch(function(error) {
-        console.log(error)
-      });
-  }
-
-  render() {
-    return (
-      <React.Fragment>
-      <ToastContainer />
-        <div className="home-btn d-none d-sm-block">
-          <Link to="/" className="text-dark">
-            <i className="bx bx-home h2" />
-          </Link>
-        </div>
-        <div className="account-pages my-5 pt-sm-5">
-          <Container>
-            <Row className="justify-content-center">
-              <Col md={8} lg={6} xl={5}>
-                <Card className="overflow-hidden">
-                  <div className="bg-primary bg-soft">
-                    <Row>
-                      <Col className="col-7">
-                        <div className="text-primary p-4">
-                          <h5 className="text-primary">Welcome Back !</h5>
-                          <p>Sign in to continue to Skote.</p>
-                        </div>
-                      </Col>
-                      <Col className="col-5 align-self-end">
-                        <img src={profile} alt="" className="img-fluid" />
-                      </Col>
-                    </Row>
-                  </div>
-                  <CardBody className="pt-0">
-                    <div className="auth-logo">
-                      <Link to="/" className="auth-logo-light">
-                        <div className="avatar-md profile-user-wid mb-4">
-                          <span className="avatar-title rounded-circle bg-light">
-                            <img
-                              src={lightlogo}
-                              alt=""
-                              className="rounded-circle"
-                              height="34"
-                            />
-                          </span>
-                        </div>
-                      </Link>
-                      <Link to="/" className="auth-logo-dark">
-                        <div className="avatar-md profile-user-wid mb-4">
-                          <span className="avatar-title rounded-circle bg-light">
-                            <img
-                              src={logo}
-                              alt=""
-                              className="rounded-circle"
-                              height="34"
-                            />
-                          </span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="p-2">
-                      {this.props.error && this.props.error ? (
-                        <Alert color="danger">{this.props.error}</Alert>
-                      ) : null}
-                      <Formik
-                        enableReinitialize={true}
-                        initialValues={{
-                          email:
-                            (this.state && this.state.email) ||
-                            "",
-                          password:
-                            (this.state && this.state.password) || "",
-                        }}
-                        validationSchema={Yup.object().shape({
-                          email: Yup.string().required(
-                            "Please Enter Your Email"
-                          ),
-                          password: Yup.string().required(
-                            "Please Enter Valid Password"
-                          ),
-                        })}
-                        onSubmit={values => {
-                          // this.props.loginUser(values, this.props.history);
-                          this.handleValidSubmit(values);
-                          // console.log(this.props.loginUser())
-                        }}
-                      >
-                        {({ errors, status, touched }) => (
-
-                          <Form className="form-horizontal">
-                            <div className="mb-3">
-                              <Label for="email" className="form-label">
-                                Email
-                              </Label>
-                              <Field
-                                name="email"
-                                type="text"
-                                className={
-                                  "form-control" +
-                                  (errors.email && touched.email
-                                    ? " is-invalid"
-                                    : "")
-                                }
-                              />
-                              <ErrorMessage
-                                name="email"
-                                component="div"
-                                className="invalid-feedback"
-                              />
-                            </div>
-                            <div className="mb-3">
-                              <Label for="password" className="form-label">
-                                Password
-                              </Label>
-                              <div className={`input-group auth-pass-inputgroup ${ errors.password && touched.password ? 'is-invalid':'' }`} >
-                                <Field
-                                  name="password"
-                                  type="password"
-                                  autoComplete="true"
-                                  className={
-                                    "form-control" +
-                                    (errors.password && touched.password
-                                      ? " is-invalid"
-                                      : "")
-                                  }
-                                />
-                                <button
-                                  className="btn btn-light "
-                                  type="button"
-                                  id="password-addon"
-                                >
-                                  <i className="mdi mdi-eye-outline"></i>
-                                </button>
-                              </div>
-                              <ErrorMessage
-                                name="password"
-                                component="div"
-                                className="invalid-feedback"
-                              />
-                            </div>
-
-                            <div className="form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id="customControlInline"
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor="customControlInline"
-                              >
-                                Remember me
-                              </label>
-                            </div>
-
-                            <div className="mt-3 d-grid">
-                              <button
-                                className="btn btn-primary btn-block waves-effect waves-light"
-                                type="submit" disabled={this.state.isLoading}
-                              >
-                                {this.state.isLoading && <span>Loading...</span>}
-                                {!this.state.isLoading && <span>Log In</span>}
-                              </button>
-                            </div>
-
-                            <div className="mt-4 text-center">
-                              <h5 className="font-size-14 mb-3">
-                                Sign in with
-                              </h5>
-
-                              <ul className="list-inline">
-                                <li className="list-inline-item">
-                                  <FacebookLogin
-                                    appId={facebook.APP_ID}
-                                    autoLoad={false}
-                                    callback={this.facebookResponse}
-                                    render={renderProps => (
-                                      <Link
-                                        to={""}
-                                        className="social-list-item bg-primary text-white border-primary"
-                                      >
-                                        <i className="mdi mdi-facebook" />
-                                      </Link>
-                                    )}
-                                  />
-                                </li>
-                                <li className="list-inline-item">
-                                  {google.CLIENT_ID === "" ? (
-                                    ""
-                                  ) : (
-                                    <GoogleLogin
-                                      clientId={google.CLIENT_ID}
-                                      render={renderProps => (
-                                        <Link
-                                          to={""}
-                                          className="social-list-item bg-danger text-white border-danger"
-                                        >
-                                          <i className="mdi mdi-google" />
-                                        </Link>
-                                      )}
-                                      onSuccess={this.googleResponse}
-                                      onFailure={() => { }}
-                                    />
-                                  )}
-                                </li>
-                              </ul>
-                            </div>
-
-                            <div className="mt-4 text-center">
-                              <Link
-                                to="/forgot-password"
-                                className="text-muted"
-                              >
-                                <i className="mdi mdi-lock me-1" /> Forgot your
-                                password?
-                              </Link>
-                            </div>
-                          </Form>
-                        )}
-                      </Formik>
-                    </div>
-                  </CardBody>
-                </Card>
-                <div className="mt-5 text-center">
-                  <p>
-                    Don&apos;t have an account ?
-                    <Link to="register" className="fw-medium text-primary">
-                      Signup Now
-                    </Link>
-                  </p>
-                  <p>
-                    © {new Date().getFullYear()} Skote. Crafted with
-                    <i className="mdi mdi-heart text-danger" /> by Themesbrand
-                  </p>
+  return (
+    <React.Fragment>
+      <div className="home-btn d-none d-sm-block">
+        <Link to="/" className="text-dark">
+          <i className="fas fa-home h2" />
+        </Link>
+      </div>
+      <div className="account-pages my-5 pt-sm-5">
+        <Container>
+          <Row className="justify-content-center">
+            <Col md={8} lg={6} xl={5}>
+              <Card className="overflow-hidden">
+                <div className="bg-primary bg-soft">
+                  <Row>
+                    <Col xs={7}>
+                      <div className="text-primary p-4">
+                        <h5 className="text-primary">Welcome Back !</h5>
+                        <p>Sign in to continue to Skote.</p>
+                      </div>
+                    </Col>
+                    <Col className="col-5 align-self-end">
+                      <img src={profile} alt="" className="img-fluid" />
+                    </Col>
+                  </Row>
                 </div>
-              </Col>
-            </Row>
-          </Container>
-        </div>
-      </React.Fragment>
-    );
-  }
-}
+                <CardBody className="pt-0">
+                  <div>
+                    <Link to="/" className="auth-logo-light">
+                      <div className="avatar-md profile-user-wid mb-4">
+                        <span className="avatar-title rounded-circle bg-light">
+                          <img
+                            src={logo}
+                            alt=""
+                            className="rounded-circle"
+                            height="34"
+                          />
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                  <div className="p-2">
+                    <Form
+                      className="form-horizontal"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        validation.handleSubmit();
+                        return false;
+                      }}
+                    >
+                      {error ? <Alert color="danger">{error}</Alert> : null}
+
+                      <div className="mb-3">
+                        <Label className="form-label">Email</Label>
+                        <Input
+                          name="email"
+                          className="form-control"
+                          placeholder="Enter email"
+                          type="email"
+                          onChange={validation.handleChange}
+                          onBlur={validation.handleBlur}
+                          value={validation.values.email || ""}
+                          invalid={
+                            validation.touched.email && validation.errors.email ? true : false
+                          }
+                        />
+                        {validation.touched.email && validation.errors.email ? (
+                          <FormFeedback type="invalid">{validation.errors.email}</FormFeedback>
+                        ) : null}
+                      </div>
+
+                      <div className="mb-3">
+                        <Label className="form-label">Password</Label>
+                        <Input
+                          name="password"
+                          value={validation.values.password || ""}
+                          type="password"
+                          placeholder="Enter Password"
+                          onChange={validation.handleChange}
+                          onBlur={validation.handleBlur}
+                          invalid={
+                            validation.touched.password && validation.errors.password ? true : false
+                          }
+                        />
+                        {validation.touched.password && validation.errors.password ? (
+                          <FormFeedback type="invalid">{validation.errors.password}</FormFeedback>
+                        ) : null}
+                      </div>
+
+                      <div className="form-check">
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          id="customControlInline"
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="customControlInline"
+                        >
+                          Remember me
+                        </label>
+                      </div>
+
+                      <div className="mt-3 d-grid">
+                        <button
+                          className="btn btn-primary btn-block"
+                          type="submit"
+                        >
+                          Log In
+                        </button>
+                      </div>
+
+                      <div className="mt-4 text-center">
+                        <h5 className="font-size-14 mb-3">Sign in with</h5>
+
+                        <ul className="list-inline">
+                          <li className="list-inline-item">
+                            <FacebookLogin
+                              appId={facebook.APP_ID}
+                              autoLoad={false}
+                              callback={facebookResponse}
+                              render={renderProps => (
+                                <Link
+                                  to="#"
+                                  className="social-list-item bg-primary text-white border-primary"
+                                  onClick={renderProps.onClick}
+                                >
+                                  <i className="mdi mdi-facebook" />
+                                </Link>
+                              )}
+                            />
+                          </li>
+                          {/*<li className="list-inline-item">*/}
+                          {/*  <TwitterLogin*/}
+                          {/*    loginUrl={*/}
+                          {/*      "http://localhost:4000/api/v1/auth/twitter"*/}
+                          {/*    }*/}
+                          {/*    onSuccess={this.twitterResponse}*/}
+                          {/*    onFailure={this.onFailure}*/}
+                          {/*    requestTokenUrl={*/}
+                          {/*      "http://localhost:4000/api/v1/auth/twitter/revers"*/}
+                          {/*    }*/}
+                          {/*    showIcon={false}*/}
+                          {/*    tag={"div"}*/}
+                          {/*  >*/}
+                          {/*    <a*/}
+                          {/*      href=""*/}
+                          {/*      className="social-list-item bg-info text-white border-info"*/}
+                          {/*    >*/}
+                          {/*      <i className="mdi mdi-twitter"/>*/}
+                          {/*    </a>*/}
+                          {/*  </TwitterLogin>*/}
+                          {/*</li>*/}
+                          <li className="list-inline-item">
+                            <GoogleLogin
+                              clientId={google.CLIENT_ID}
+                              render={renderProps => (
+                                <Link
+                                  to="#"
+                                  className="social-list-item bg-danger text-white border-danger"
+                                  onClick={renderProps.onClick}
+                                >
+                                  <i className="mdi mdi-google" />
+                                </Link>
+                              )}
+                              onSuccess={googleResponse}
+                              onFailure={() => { }}
+                            />
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="mt-4 text-center">
+                        <Link to="/forgot-password" className="text-muted">
+                          <i className="mdi mdi-lock me-1" />
+                          Forgot your password?
+                        </Link>
+                      </div>
+                    </Form>
+                  </div>
+                </CardBody>
+              </Card>
+              <div className="mt-5 text-center">
+                <p>
+                  Don&#39;t have an account ?{" "}
+                  <Link to="/register" className="fw-medium text-primary">
+                    {" "}
+                    Signup now{" "}
+                  </Link>{" "}
+                </p>
+                <p>
+                  © {new Date().getFullYear()} Skote. Crafted with{" "}
+                  <i className="mdi mdi-heart text-danger" /> by Themesbrand
+                </p>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </React.Fragment>
+  );
+};
+
+export default withRouter(Login);
 
 Login.propTypes = {
-  apiError: PropTypes.any,
-  error: PropTypes.any,
   history: PropTypes.object,
-  loginUser: PropTypes.func,
-  socialLogin: PropTypes.func,
 };
-
-const mapStateToProps = state => {
-  const { error } = state.Login;
-  return { error };
-};
-
-export default withRouter(
-  connect(mapStateToProps, { loginUser, apiError, socialLogin })(Login)
-);

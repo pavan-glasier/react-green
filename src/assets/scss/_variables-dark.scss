@@ -10,7 +10,7 @@ $sidebar-menu-item-color: #545a6d;
 $sidebar-menu-sub-item-color: #545a6d;
 $sidebar-menu-item-icon-color: #7f8387;
 $sidebar-menu-item-hover-color: #383c40;
-$sidebar-menu-item-active-color: #556ee6;
+$sidebar-menu-item-active-color: #3c7c44;
 $sidebar-width: 250px;
 $sidebar-collapsed-width: 70px;
 $sidebar-width-sm: 160px;
@@ -30,7 +30,7 @@ $header-bg: #262b3c;
 $header-item-color: #a6b0cf;
 
 // Topbar - Dark
-$header-dark-bg: #556ee6;
+$header-dark-bg: #3c7c44;
 $header-dark-item-color: #e9ecef;
 
 // Topbar Search
@@ -44,7 +44,7 @@ $footer-color: #a6b0cf;
 // Horizontal nav
 $topnav-bg: #282e3f;
 $menu-item-color: #a6b0cf;
-$menu-item-active-color: #556ee6;
+$menu-item-active-color: #3c7c44;
 
 // Right Sidebar
 $rightbar-width: 280px;
@@ -109,7 +109,7 @@ $grays: (
 // fusv-enable
 
 // scss-docs-start color-variables
-$blue: #556ee6;
+$darkGreen: #3c7c44;
 $indigo: #564ab1;
 $purple: #6f42c1;
 $pink: #e83e8c;
@@ -123,7 +123,7 @@ $cyan: #50a5f1;
 
 // scss-docs-start colors-map
 $colors: (
-  "blue": $blue,
+  "darkGreen": $darkGreen,
   "indigo": $indigo,
   "purple": $purple,
   "pink": $pink,
@@ -140,7 +140,7 @@ $colors: (
 // scss-docs-end colors-map
 
 // scss-docs-start theme-color-variables
-$primary: $blue;
+$primary: $darkGreen;
 $secondary: $gray-600;
 $success: $green;
 $info: $cyan;
@@ -177,15 +177,15 @@ $color-contrast-dark: $black;
 $color-contrast-light: $white;
 
 // fusv-disable
-$blue-100: tint-color($blue, 80%);
-$blue-200: tint-color($blue, 60%);
-$blue-300: tint-color($blue, 40%);
-$blue-400: tint-color($blue, 20%);
-$blue-500: $blue;
-$blue-600: shade-color($blue, 20%);
-$blue-700: shade-color($blue, 40%);
-$blue-800: shade-color($blue, 60%);
-$blue-900: shade-color($blue, 80%);
+$darkGreen-100: tint-color($darkGreen, 80%);
+$darkGreen-200: tint-color($darkGreen, 60%);
+$darkGreen-300: tint-color($darkGreen, 40%);
+$darkGreen-400: tint-color($darkGreen, 20%);
+$darkGreen-500: $darkGreen;
+$darkGreen-600: shade-color($darkGreen, 20%);
+$darkGreen-700: shade-color($darkGreen, 40%);
+$darkGreen-800: shade-color($darkGreen, 60%);
+$darkGreen-900: shade-color($darkGreen, 80%);
 
 $indigo-100: tint-color($indigo, 80%);
 $indigo-200: tint-color($indigo, 60%);
@@ -276,16 +276,16 @@ $cyan-600: shade-color($cyan, 20%);
 $cyan-700: shade-color($cyan, 40%);
 $cyan-800: shade-color($cyan, 60%);
 $cyan-900: shade-color($cyan, 80%);
-$blues: (
-  "blue-100": $blue-100,
-  "blue-200": $blue-200,
-  "blue-300": $blue-300,
-  "blue-400": $blue-400,
-  "blue-500": $blue-500,
-  "blue-600": $blue-600,
-  "blue-700": $blue-700,
-  "blue-800": $blue-800,
-  "blue-900": $blue-900,
+$darkGreens: (
+  "darkGreen-100": $darkGreen-100,
+  "darkGreen-200": $darkGreen-200,
+  "darkGreen-300": $darkGreen-300,
+  "darkGreen-400": $darkGreen-400,
+  "darkGreen-500": $darkGreen-500,
+  "darkGreen-600": $darkGreen-600,
+  "darkGreen-700": $darkGreen-700,
+  "darkGreen-800": $darkGreen-800,
+  "darkGreen-900": $darkGreen-900,
 );
 
 $indigos: (

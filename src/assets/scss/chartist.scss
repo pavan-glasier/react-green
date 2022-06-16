@@ -1,4 +1,4 @@
-$blue: #556ee6;
+$darkGreen: #3c7c44;
 $indigo: #564ab1;
 $purple: #6f42c1;
 $pink: #e83e8c;
@@ -21,7 +21,7 @@ $gray-800: #343a40;
 $gray-900: #212529;
 $black: #000;
 
-$primary: $blue;
+$primary: $darkGreen;
 $secondary: $gray-600;
 $success: $green;
 $info: $cyan;
@@ -39,7 +39,7 @@ $dark: $gray-800;
 .ct-chart {
   max-height: 300px;
   .ct-label {
-    fill: $gray-100 !important;
+    fill: $gray-100!important;
     color: $gray-500;
     font-size: 12px;
     line-height: 1;

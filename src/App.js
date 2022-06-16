@@ -1,30 +1,31 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { BrowserRouter as Router, Switch } from "react-router-dom";
+import PropTypes from 'prop-types';
+import React from "react";
+
+import { Switch, BrowserRouter as Router } from "react-router-dom";
 import { connect } from "react-redux";
 
-// Import Routes
-import { authProtectedRoutes, publicRoutes } from "./routes/";
-import AppRoute from "./routes/route";
+// Import Routes all
+import { authProtectedRoutes, publicRoutes } from "./routes";
 
-// layouts
+// Import all middleware
+import Authmiddleware from "./routes/route";
+
+// layouts Format
 import VerticalLayout from "./components/VerticalLayout/";
-// import HorizontalLayout from "./components/HorizontalLayout/";
+import HorizontalLayout from "./components/HorizontalLayout/";
 import NonAuthLayout from "./components/NonAuthLayout";
 
 // Import scss
 import "./assets/scss/theme.scss";
 
 // Import Firebase Configuration file
-// import { initFirebaseBackend } from "./helpers/firebase_helper"
+// import { initFirebaseBackend } from "./helpers/firebase_helper";
 
-// Import fackbackend Configuration file
-import fakeBackend from "./helpers/AuthType/fakeBackend";
+import fakeBackend from "./helpers/AuthType/fakeBackend"
 
 // Activating fake backend
-fakeBackend();
+fakeBackend()
 
-// Activating fake firebase
 // const firebaseConfig = {
 //   apiKey: process.env.REACT_APP_APIKEY,
 //   authDomain: process.env.REACT_APP_AUTHDOMAIN,
@@ -39,72 +40,61 @@ fakeBackend();
 // init firebase backend
 // initFirebaseBackend(firebaseConfig);
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    // this.getLayout = this.getLayout.bind(this);
+const App = props => {
+
+  function getLayout() {
+    let layoutCls = VerticalLayout;
+    switch (props.layout.layoutType) {
+      case "horizontal":
+        layoutCls = HorizontalLayout;
+        break;
+      default:
+        layoutCls = VerticalLayout;
+        break;
+    }
+    return layoutCls;
   }
 
-  /**
-   * Returns the layout
-   */
-  // getLayout = () => {
-  //   let layoutCls = VerticalLayout;
+  const Layout = getLayout();
+  return (
+    <React.Fragment>
+      <Router>
+        <Switch>
+          {publicRoutes.map((route, idx) => (
+            <Authmiddleware
+              path={route.path}
+              layout={NonAuthLayout}
+              component={route.component}
+              key={idx}
+              isAuthProtected={false}
+              exact
+            />
+          ))}
 
-  //   switch (this.props.layout.layoutType) {
-  //     case "horizontal":
-  //       layoutCls = HorizontalLayout;
-  //       break;
-  //     default:
-  //       layoutCls = VerticalLayout;
-  //       break;
-  //   }
-  //   return layoutCls;
-  // };
-
-  render() {
-    // const Layout = this.getLayout();
-
-    return (
-      <React.Fragment>
-        <Router>
-          <Switch>
-            {publicRoutes.map((route, idx) => (
-              <AppRoute
-                path={route.path}
-                layout={NonAuthLayout}
-                component={route.component}
-                key={idx}
-                isAuthProtected={false}
-              />
-            ))}
-
-            {authProtectedRoutes.map((route, idx) => (
-              <AppRoute
-                path={route.path}
-                layout={VerticalLayout}
-                component={route.component}
-                key={idx}
-                isAuthProtected={true}
-                exact
-              />
-            ))}
-          </Switch>
-        </Router>
-      </React.Fragment>
-    );
-  }
-}
-
-const mapStateToProps = state => {
-  return {
-    // layout: state.Layout,
-  };
+          {authProtectedRoutes.map((route, idx) => (
+            <Authmiddleware
+              path={route.path}
+              layout={Layout}
+              component={route.component}
+              key={idx}
+              isAuthProtected={true}
+              exact
+            />
+          ))}
+        </Switch>
+      </Router>
+    </React.Fragment>
+  );
 };
 
 App.propTypes = {
-  // layout: PropTypes.object,
+  layout: PropTypes.any
+};
+
+const mapStateToProps = state => {
+  return {
+    layout: state.Layout,
+  };
 };
 
 export default connect(mapStateToProps, null)(App);

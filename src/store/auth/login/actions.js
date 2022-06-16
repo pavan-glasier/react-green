@@ -8,8 +8,6 @@ import {
 } from "./actionTypes"
 
 export const loginUser = (user, history) => {
-  console.log("user", user);
-  console.log("history",history);
   return {
     type: LOGIN_USER,
     payload: { user, history },
